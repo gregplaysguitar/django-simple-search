@@ -7,20 +7,6 @@ from django.conf import settings
 from django.core.exceptions import FieldError
 
 
-
-
-"""
-group_exp = re.compile('(("[^"]+")|(\'[^\']+\')|(\\S+))')
-quotes_exp = re.compile('(^[\'"])|([\'"]$)')
-
-def get_query(query_string, fields, type="regex"):
-    return reduce(Q.__or__, (Q(**{'%s__iregex' % field: r"\b%s\b" % term.strip('\'"')}) for term in smart_split(query_string) if term not in ['and', 'or'] for field in fields), Q())
-
-"""
-      
- 
- 
-
     
 class BaseSearchForm(forms.Form):
     q = forms.CharField(label='Search', required=False)
