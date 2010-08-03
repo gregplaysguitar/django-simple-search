@@ -6,6 +6,21 @@ from django.utils.text import smart_split
 from django.conf import settings
 from django.core.exceptions import FieldError
 
+
+
+
+"""
+group_exp = re.compile('(("[^"]+")|(\'[^\']+\')|(\\S+))')
+quotes_exp = re.compile('(^[\'"])|([\'"]$)')
+
+def get_query(query_string, fields, type="regex"):
+    return reduce(Q.__or__, (Q(**{'%s__iregex' % field: r"\b%s\b" % term.strip('\'"')}) for term in smart_split(query_string) if term not in ['and', 'or'] for field in fields), Q())
+
+"""
+      
+ 
+ 
+
     
 class BaseSearchForm(forms.Form):
     q = forms.CharField(label='Search', required=False)
@@ -27,9 +42,12 @@ class BaseSearchForm(forms.Form):
     def get_text_search_query(self, query_string):
         filters = []
         
-        def construct_search(field_name):
+        def construct_search(field_name, first):
             if field_name.startswith('^'):
-                return "%s__istartswith" % field_name[1:]
+                if first:
+                    return "%s__istartswith" % field_name[1:]
+                else:
+                    return "%s__icontains" % field_name[1:]
             elif field_name.startswith('='):
                 return "%s__iexact" % field_name[1:]
             elif field_name.startswith('@'):
@@ -40,10 +58,11 @@ class BaseSearchForm(forms.Form):
             else:
                 return "%s__icontains" % field_name
         
+        first = True
         for bit in smart_split(query_string):
-            or_queries = [Q(**{construct_search(str(field_name)): bit}) for field_name in self.Meta.search_fields]
+            or_queries = [Q(**{construct_search(str(field_name), first): bit}) for field_name in self.Meta.search_fields]
             filters.append(reduce(Q.__or__, or_queries))
-        
+            first = False
         
         return reduce(Q.__and__, filters)
 
@@ -69,16 +88,17 @@ class BaseSearchForm(forms.Form):
                 args.append(Q(**{field: cleaned_data[field]}))
         
         return args
-        
+    
         
     def get_result_queryset(self):
         qs = self.Meta.base_qs.filter(*self.construct_filter_args())
+        """
         for field_name in self.Meta.search_fields:
             if '__' in field_name:
                 qs = qs.distinct()
                 break
-        
+        """
         if self.cleaned_data['order_by']:
-            qs = qs.order_by(self.cleaned_data['order_by'])
+            qs = qs.order_by(*self.cleaned_data['order_by'].split(','))
                             
         return qs
