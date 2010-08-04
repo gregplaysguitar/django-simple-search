@@ -66,7 +66,10 @@ class BaseSearchForm(forms.Form):
         # if its an instance of Q, append to filter args
         # otherwise assume an exact match lookup
         for field in cleaned_data:
-            if isinstance(cleaned_data[field], Q):
+             
+            if hasattr(self, 'prepare_%s' % field):
+                args.append(getattr(self, 'prepare_%s' % field)())
+            elif isinstance(cleaned_data[field], Q):
                 args.append(cleaned_data[field])
             elif field == 'order_by':
                 pass # special case - ordering handled in get_result_queryset
