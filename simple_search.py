@@ -23,7 +23,6 @@ class BaseSearchForm(forms.Form):
         abstract = True
         base_qs = None
         search_fields = None
-        fulltext_fields = None
 
     def get_text_search_query(self, query_string):
         filters = []
