@@ -67,7 +67,9 @@ class BaseSearchForm(forms.Form):
         for field in cleaned_data:
              
             if hasattr(self, 'prepare_%s' % field):
-                args.append(getattr(self, 'prepare_%s' % field)())
+                q_obj = getattr(self, 'prepare_%s' % field)()
+                if q_obj:
+                    args.append(q_obj)
             elif isinstance(cleaned_data[field], Q):
                 args.append(cleaned_data[field])
             elif field == 'order_by':
