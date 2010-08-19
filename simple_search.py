@@ -43,6 +43,7 @@ class BaseSearchForm(forms.Form):
         abstract = True
         base_qs = None
         search_fields = None
+        default_operator = Q.__and__
 
     def get_text_search_query(self, query_string):
         filters = []
@@ -69,14 +70,14 @@ class BaseSearchForm(forms.Form):
             filters.append(reduce(Q.__or__, or_queries))
             first = False
         
-        return reduce(Q.__and__, filters)
+        return reduce(getattr(self.Meta, 'default_operator', Q.__and__), filters)
 
 
     def construct_filter_args(self, cleaned_data=None):
         args = []
         
         if not cleaned_data:
-            cleaned_data = self.cleaned_data
+            cleaned_data = self.cleaned_data.copy()
         
         # construct text search
         if cleaned_data['q']:
