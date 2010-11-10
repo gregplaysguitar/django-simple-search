@@ -1,4 +1,4 @@
-See http://gregbrown.co.nz/code/django-simple-search/ for details
+See <http://gregbrown.co.nz/code/django-simple-search/> for details
 
 Sample usage:
 
