@@ -1,5 +1,6 @@
 import re
 from django.db.models import Q
+from django.db.models.query import QuerySet
 from django import forms
 
 from django.utils.text import smart_split
@@ -85,7 +86,10 @@ class BaseSearchForm(forms.Form):
             elif field == 'order_by':
                 pass # special case - ordering handled in get_result_queryset
             elif cleaned_data[field]:
-                args.append(Q(**{field: cleaned_data[field]}))
+                if isinstance(cleaned_data[field], list) or isinstance(cleaned_data[field], QuerySet):
+                    args.append(Q(**{field + '__in': cleaned_data[field]}))
+                else:
+                    args.append(Q(**{field: cleaned_data[field]}))
         
         return args
     
