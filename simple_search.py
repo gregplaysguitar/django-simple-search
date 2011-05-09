@@ -11,6 +11,13 @@ from django.core.exceptions import FieldError
 
 DEFAULT_STOPWORDS = 'a,able,about,across,after,all,almost,also,am,among,an,and,any,are,as,at,be,because,been,but,by,can,cannot,could,dear,did,do,does,either,else,ever,every,for,from,get,got,had,has,have,he,her,hers,him,his,how,however,i,if,in,into,is,it,its,just,least,let,like,likely,may,me,might,most,must,my,neither,no,nor,not,of,off,often,on,only,or,other,our,own,rather,said,say,says,she,should,since,so,some,than,that,the,their,them,then,there,these,they,this,tis,to,too,twas,us,wants,was,we,were,what,when,where,which,while,who,whom,why,will,with,would,yet,you,your'
 
+
+if settings.DATABASES:
+    DATABASE_ENGINE =  settings.DATABASES[settings.DATABASES.keys()[0]]['ENGINE'].split('.')[-1]
+else:
+    DATABASE_ENGINE =  settings.DATABASE_ENGINE
+
+
     
 class BaseSearchForm(forms.Form):
     STOPWORD_LIST = DEFAULT_STOPWORDS.split(',')
@@ -44,7 +51,7 @@ class BaseSearchForm(forms.Form):
             elif field_name.startswith('='):
                 return "%s__iexact" % field_name[1:]
             elif field_name.startswith('@'):
-                if settings.DATABASE_ENGINE == 'mysql':
+                if DATABASE_ENGINE == 'mysql':
                     return "%s__search" % field_name[1:]
                 else:
                     return "%s__icontains" % field_name[1:]
