@@ -66,7 +66,11 @@ class BaseSearchForm(forms.Form):
         for bit in split_q:
             if bit not in self.STOPWORD_LIST:
                 filtered_q.append(bit)
-        for bit in (filtered_q if len(filtered_q) else split_q):
+        if len(filtered_q):
+            bits = filtered_q
+        else:
+            bits = split_q
+        for bit in (bits):
             or_queries = [Q(**{construct_search(str(field_name), first): bit}) for field_name in self.Meta.search_fields]
             filters.append(reduce(Q.__or__, or_queries))
             first = False
