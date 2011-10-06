@@ -39,24 +39,25 @@ class BaseSearchForm(forms.Form):
         search_fields = None
         
         
+    def construct_search(self, field_name, first):
+        if field_name.startswith('^'):
+            if first:
+                return "%s__istartswith" % field_name[1:]
+            else:
+                return "%s__icontains" % field_name[1:]
+        elif field_name.startswith('='):
+            return "%s__iexact" % field_name[1:]
+        elif field_name.startswith('@'):
+            if DATABASE_ENGINE == 'mysql':
+                return "%s__search" % field_name[1:]
+            else:
+                return "%s__icontains" % field_name[1:]
+        else:
+            return "%s__icontains" % field_name
+        
     def get_text_search_query(self, query_string):
         filters = []
         
-        def construct_search(field_name, first):
-            if field_name.startswith('^'):
-                if first:
-                    return "%s__istartswith" % field_name[1:]
-                else:
-                    return "%s__icontains" % field_name[1:]
-            elif field_name.startswith('='):
-                return "%s__iexact" % field_name[1:]
-            elif field_name.startswith('@'):
-                if DATABASE_ENGINE == 'mysql':
-                    return "%s__search" % field_name[1:]
-                else:
-                    return "%s__icontains" % field_name[1:]
-            else:
-                return "%s__icontains" % field_name
         
         first = True
         split_q = list(smart_split(query_string))
@@ -71,10 +72,11 @@ class BaseSearchForm(forms.Form):
         else:
             bits = split_q
         for bit in (bits):
-            or_queries = [Q(**{construct_search(str(field_name), first): bit}) for field_name in self.Meta.search_fields]
+            or_queries = [Q(**{self.construct_search(str(field_name), first): bit}) for field_name in self.Meta.search_fields]
+            print or_queries
             filters.append(reduce(Q.__or__, or_queries))
             first = False
-        
+       
         if len(filters):
             return reduce(self.DEFAULT_OPERATOR, filters)
         else:
