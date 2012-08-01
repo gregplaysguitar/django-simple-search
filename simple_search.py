@@ -36,7 +36,13 @@ class BaseSearchForm(forms.Form):
     class Meta:
         abstract = True
         base_qs = None
+        
+        # example: ['name', 'category__name', '@description', '=id']
         search_fields = None
+        
+        # should be a list of  pairs, of the form ('field1,field2', WEIGHTING)
+        # where WEIGHTING is an integer weighting
+        fulltext_indexes = None
         
         
     def get_text_search_query(self, query_string):
@@ -108,20 +114,40 @@ class BaseSearchForm(forms.Form):
     def get_result_queryset(self):
         qs = self.Meta.base_qs
         cleaned_data = self.cleaned_data.copy()
-        
-        
-        # construct text search
-        if cleaned_data['q']:
-            text_q = self.get_text_search_query(cleaned_data.pop('q'))
-            if text_q:
-                qs = qs.filter(text_q)
-            else:
-                qs = qs.none()
+        query_text = cleaned_data.pop('q', None)
         
         qs = qs.filter(*self.construct_filter_args(cleaned_data))
 
+        if query_text:
+            if True or DATABASE_ENGINE == 'mysql' and self.Meta.fulltext_indexes:
+                # cross-column fulltext search if db is mysql, otherwise use default behaviour.
+                # We're assuming the appropriate fulltext index has been created
+                match_bits = []
+                params = []
+                for index in self.Meta.fulltext_indexes:
+                    match_bits.append('MATCH(%s) AGAINST (%%s) * %s' % index)
+                    params.append(query_text)
+                
+                match_expr = ' + '.join(match_bits)
+                
+                qs = qs.extra(
+                    select={'relevance': match_expr},
+                    where=(match_expr,),
+                    params=params,
+                    select_params=params,
+                    order_by=('-relevance',)
+                )
+                    
+            else:
+                # construct text search for sqlite, or for when no fulltext indexes are defined
+                text_q = self.get_text_search_query(query_text)
+                if text_q:
+                    qs = qs.filter(text_q)
+                else:
+                    qs = qs.none()
 
         if self.cleaned_data['order_by']:
             qs = qs.order_by(*self.cleaned_data['order_by'].split(','))
                             
         return qs
+    
