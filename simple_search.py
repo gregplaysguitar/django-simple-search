@@ -45,42 +45,48 @@ class BaseSearchForm(forms.Form):
         fulltext_indexes = None
         
         
-    def get_text_search_query(self, query_string):
-        filters = []
-        
-        def construct_search(field_name, first):
-            if field_name.startswith('^'):
-                if first:
-                    return "%s__istartswith" % field_name[1:]
-                else:
-                    return "%s__icontains" % field_name[1:]
-            elif field_name.startswith('='):
-                return "%s__iexact" % field_name[1:]
-            elif field_name.startswith('@'):
-                if DATABASE_ENGINE == 'mysql':
-                    return "%s__search" % field_name[1:]
-                else:
-                    return "%s__icontains" % field_name[1:]
+    def construct_search(self, field_name, first):
+        if field_name.startswith('^'):
+            if first:
+                return "%s__istartswith" % field_name[1:]
             else:
-                return "%s__icontains" % field_name
+                return "%s__icontains" % field_name[1:]
+        elif field_name.startswith('='):
+            return "%s__iexact" % field_name[1:]
+        elif field_name.startswith('@'):
+            if DATABASE_ENGINE == 'mysql':
+                return "%s__search" % field_name[1:]
+            else:
+                return "%s__icontains" % field_name[1:]
+        else:
+            return "%s__icontains" % field_name
+    
+    
+    def get_text_query_bits(self, query_string):
+        """filter stopwords but only if there are useful words"""
         
-        first = True
         split_q = list(smart_split(query_string))
-        
-        # filter stopwords but only if there are useful words
         filtered_q = []
+        
         for bit in split_q:
             if bit not in self.STOPWORD_LIST:
                 filtered_q.append(bit)
+        
         if len(filtered_q):
-            bits = filtered_q
+            return filtered_q
         else:
-            bits = split_q
-        for bit in (bits):
-            or_queries = [Q(**{construct_search(str(field_name), first): bit}) for field_name in self.Meta.search_fields]
+            return split_q
+    
+    
+    def get_text_search_query(self, query_string):
+        filters = []
+        first = True
+            
+        for bit in self.get_text_query_bits(query_string):
+            or_queries = [Q(**{self.construct_search(str(field_name), first): bit}) for field_name in self.Meta.search_fields]
             filters.append(reduce(Q.__or__, or_queries))
             first = False
-        
+       
         if len(filters):
             return reduce(self.DEFAULT_OPERATOR, filters)
         else:
