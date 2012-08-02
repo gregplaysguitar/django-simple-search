@@ -125,7 +125,7 @@ class BaseSearchForm(forms.Form):
         qs = qs.filter(*self.construct_filter_args(cleaned_data))
 
         if query_text:
-            if True or DATABASE_ENGINE == 'mysql' and self.Meta.fulltext_indexes:
+            if DATABASE_ENGINE == 'mysql' and self.Meta.fulltext_indexes:
                 # cross-column fulltext search if db is mysql, otherwise use default behaviour.
                 # We're assuming the appropriate fulltext index has been created
                 match_bits = []
