@@ -41,7 +41,8 @@ class BaseSearchForm(forms.Form):
         search_fields = None
         
         # should be a list of  pairs, of the form ('field1,field2', WEIGHTING)
-        # where WEIGHTING is an integer weighting
+        # where WEIGHTING is an integer. Assumes the relevant indexes have been
+        # created
         fulltext_indexes = None
         
         
