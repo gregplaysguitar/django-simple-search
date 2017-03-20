@@ -13,19 +13,20 @@ else:
 
 setup(
     name='django-simple-search',
-    version='1.0.0',
+    version='1.0.1',
     description='Recurring event tools for django',
     long_description=open(readme_path).read(),
     author='Greg Brown',
     author_email='greg@gregbrown.co.nz',
     url='https://github.com/gregplaysguitar/django-simple-search',
-    packages=find_packages(exclude=('tests', )),
+    packages=[],
     license='BSD License',
     zip_safe=False,
     platforms='any',
     install_requires=['Django>=1.8'],
     include_package_data=True,
     package_data={},
+    py_modules=['simple_search'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',

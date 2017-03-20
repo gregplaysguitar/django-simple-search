@@ -10,7 +10,7 @@ if not locals().get('reduce'):
     from functools import reduce
 
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 VERSION = tuple(map(int, __version__.split('.')))
 
 
