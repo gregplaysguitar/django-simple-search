@@ -13,7 +13,7 @@ else:
 
 setup(
     name='django-simple-search',
-    version='1.0.1',
+    version='1.0.2',
     description='Recurring event tools for django',
     long_description=open(readme_path).read(),
     author='Greg Brown',

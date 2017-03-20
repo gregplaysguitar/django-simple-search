@@ -1,4 +1,4 @@
-Django simple search provides the same functionality and convenience as
+Django simple search provides the same functionality and convenience that
 `search_fields` does in the django admin.
 
 See <http://gregbrown.co.nz/code/django-simple-search/> for more details.
@@ -39,13 +39,13 @@ For convenience you can create a search form class via the provided factory:
 
 ## Reference
 
-#### `simple_search.search_filter(search_fields, query)`
+### `simple_search.search_filter(search_fields, query)`
 
 Given a list of `search_fields` to search on and a query, return a `models.Q`
 object which can be used to filter a queryset.
 
 `search_fields` behaves exactly like the django admin
-[`search_fields`](https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.search_fields)
+[search_fields](https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.search_fields)
 option. Example:
 
     search_fields = [
@@ -63,7 +63,7 @@ option. Example:
     ]
 
 
-#### `simple_search.search_form_factory(queryset, search_fields)`
+### `simple_search.search_form_factory(queryset, search_fields)`
 
 Create a search form class which will filter `queryset` according to
 `search_fields` and the form field `q`. Example:
