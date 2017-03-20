@@ -33,7 +33,7 @@ STOPWORDS = getattr(
 NULL_FILTER = Q(pk=None)
 
 
-def search_filter(query_string, search_fields):
+def search_filter(search_fields, query_string):
     """search_fields example: ['name', 'category__name', '@description', '=id']
     """
 
@@ -54,8 +54,8 @@ def search_filter(query_string, search_fields):
 def search_param(field_name, is_first_word):
     if field_name.startswith('^') and is_first_word:
         return "%s__istartswith" % field_name[1:]
-    elif field_name.startswith('@') or field_name.startswith('^'):
-        return "%s__icontains" % field_name[1:]
+    elif field_name.startswith('@'):
+        return "%s__search" % field_name[1:]
     elif field_name.startswith('='):
         return "%s__iexact" % field_name[1:]
     else:
@@ -71,56 +71,31 @@ def split_text_query(query):
     return filtered_query if len(filtered_query) else split_query
 
 
-class BaseSearchForm(forms.Form):
+class SearchForm(forms.Form):
+    queryset = None
+    search_fields = None
+
     q = forms.CharField(label='Search', required=False)
 
     def clean_q(self):
         return self.cleaned_data['q'].strip()
 
-    # order_by = forms.CharField(
-    #     widget=forms.HiddenInput(),
-    #     required=False,
-    # )
-
-    class Meta:
-        base_qs = None
-        search_fields = None
-
-    # def construct_filter_args(self, cleaned_data):
-    #     args = []
-    #
-    #     # if its an instance of Q, append to filter args
-    #     # otherwise assume an exact match lookup
-    #     for field in cleaned_data:
-    #
-    #         if hasattr(self, 'prepare_%s' % field):
-    #             q_obj = getattr(self, 'prepare_%s' % field)()
-    #             if q_obj:
-    #                 args.append(q_obj)
-    #         elif isinstance(cleaned_data[field], Q):
-    #             args.append(cleaned_data[field])
-    #         elif field == 'order_by':
-    #             pass  # special case
-    #         elif cleaned_data[field]:
-    #             if isinstance(cleaned_data[field], list) or isinstance(
-    #                     cleaned_data[field], QuerySet):
-    #                 args.append(Q(**{field + '__in': cleaned_data[field]}))
-    #             else:
-    #                 args.append(Q(**{field: cleaned_data[field]}))
-    #
-    #     return args
-
-    def get_result_queryset(self):
-        qs = self.Meta.base_qs
-        cleaned_data = self.cleaned_data.copy()
-        query = cleaned_data.pop('q', None)
-
-        # qs = qs.filter(*self.construct_filter_args(cleaned_data))
+    def get_queryset(self):
+        qs = self.queryset
+        query = self.cleaned_data.get('q')
 
         if query:
-            qs = qs.filter(search_filter(query, self.Meta.search_fields))
-
-        # if self.cleaned_data['order_by']:
-        #     qs = qs.order_by(*self.cleaned_data['order_by'].split(','))
+            qs = qs.filter(search_filter(self.search_fields, query))
 
         return qs
+
+
+def search_form_factory(queryset, search_fields):
+    _queryset = queryset
+    _search_fields = search_fields
+
+    class _Form(SearchForm):
+        queryset = _queryset
+        search_fields = _search_fields
+
+    return _Form

@@ -11,3 +11,5 @@ SECRET_KEY = '1'
 INSTALLED_APPS = [
     "tests",
 ]
+
+ROOT_URLCONF = 'tests.urls'
