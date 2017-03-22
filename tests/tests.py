@@ -51,6 +51,11 @@ class SimpleSearchTestCase(TestCase):
         self.assertEqual(qs[0].title, 'Line one')
         self.assertEqual(qs[1].title, 'Line two')
 
+    def test_exact(self):
+        qs = get_results('1', ['=id'])
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs[0].title, 'Line one')
+
     def test_search_view(self):
         c = Client()
 
