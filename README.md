@@ -53,19 +53,21 @@ object which can be used to filter a queryset.
 [`search_fields`](https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.search_fields)
 option. Example:
 
-    search_fields = [
-        # match from the start of the title field
-        '^title',
+```python
+search_fields = [
+    # match from the start of the title field
+    '^title',
 
-        # match anywhere within the description field
-        'description',
+    # match anywhere within the description field
+    'description',
 
-        # match from the start of the related category's title field
-        '^category__title',
+    # match from the start of the related category's title field
+    '^category__title',
 
-        # exact match on object id
-        '=id'
-    ]
+    # exact match on object id
+    '=id'
+]
+```
 
 
 #### `simple_search.search_form_factory(queryset, search_fields)`
@@ -73,35 +75,38 @@ option. Example:
 Create a search form class which will filter `queryset` according to
 `search_fields` and the form field `q`. Example:
 
-    # forms.py
-    from .models import MyModel
-    from simple_search import search_form_factory
+```python
+# forms.py
+from .models import MyModel
+from simple_search import search_form_factory
 
-    SearchForm = search_form_factory(MyModel.objects.all(),
-                                     ['^title', 'description'])
+SearchForm = search_form_factory(MyModel.objects.all(),
+                                 ['^title', 'description'])
 
-    # views.py
-    from django.shortcuts import render
-    from .forms import SearchForm
+# views.py
+from django.shortcuts import render
+from .forms import SearchForm
 
-    @render('search.html')
-    def search(request):
-        form = SearchForm(request.GET or {})
-        if form.is_valid():
-            results = form.get_queryset()
-        else:
-            results = MyModel.objects.none()
+@render('search.html')
+def search(request):
+    form = SearchForm(request.GET or {})
+    if form.is_valid():
+        results = form.get_queryset()
+    else:
+        results = MyModel.objects.none()
 
-        return {
-            'form': form,
-            'results': results,
-        }
-
+    return {
+        'form': form,
+        'results': results,
+    }
+```
 
 ## Running tests
 
 Use tox (<https://pypi.python.org/pypi/tox>):
 
-    > pip install tox
-    > cd path-to/django-simple-search
-    > tox
+```shell
+pip install tox
+cd path-to/django-simple-search
+tox
+```
