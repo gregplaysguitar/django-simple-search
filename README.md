@@ -7,35 +7,40 @@ See <http://gregbrown.co.nz/code/django-simple-search/> for more details.
 [![codecov](https://codecov.io/gh/gregplaysguitar/django-simple-search/branch/master/graph/badge.svg)](https://codecov.io/gh/gregplaysguitar/django-simple-search)
 [![Latest Version](https://img.shields.io/pypi/v/django-simple-search.svg?style=flat)](https://pypi.python.org/pypi/django-simple-search/)
 
+Installation
+---
 
-## Installation
+```shell
+pip install django-simple-search
+```
 
-Download the source from https://pypi.python.org/pypi/django-simple-search/
-and run `python setup.py install`, or:
-
-    > pip install django-simple-search
+Or download the source from https://pypi.python.org/pypi/django-simple-search/
 
 Django 1.8 or higher is required.
 
 
-## Quick start
+Quick start
+---
 
-    from simple_search import search_filter
-    from .models import MyModel
+```python
+from simple_search import search_filter
+from .models import MyModel
 
-    query = 'test'
-    search_fields = ['^title', 'description', '=id']
-    f = search_filter(search_fields, query)
-    filtered = MyModel.objects.filter(f)
+query = 'test'
+search_fields = ['^title', 'description', '=id']
+f = search_filter(search_fields, query)
+filtered = MyModel.objects.filter(f)
+```
 
 For convenience you can create a search form class via the provided factory:
 
-    from .models import MyModel
-    from simple_search import search_form_factory
+```python
+from .models import MyModel
+from simple_search import search_form_factory
 
-    SearchForm = search_form_factory(MyModel.objects.all(),
-                                     ['^title', 'description'])
-
+SearchForm = search_form_factory(MyModel.objects.all(),
+                                 ['^title', 'description'])
+```
 
 ## Reference
 
